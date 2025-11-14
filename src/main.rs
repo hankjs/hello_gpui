@@ -1,56 +1,41 @@
-use gpui::{
-    div, prelude::*, px, rgb, size, App, Application, Bounds, Context, SharedString, Window,
-    WindowBounds, WindowOptions,
-};
+use gpui::{App, Application, Context, Render, Window, WindowOptions, div, img, prelude::*};
+use std::path::PathBuf;
 
-struct HelloWorld {
-    text: SharedString,
+struct GifViewer {
+    gif_path: PathBuf,
 }
 
-impl Render for HelloWorld {
+impl GifViewer {
+    fn new(gif_path: PathBuf) -> Self {
+        Self { gif_path }
+    }
+}
+
+impl Render for GifViewer {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        div()
-            .flex()
-            .flex_col()
-            .gap_3()
-            .bg(rgb(0x505050))
-            .size(px(500.0))
-            .justify_center()
-            .items_center()
-            .shadow_lg()
-            .border_1()
-            .border_color(rgb(0x0000ff))
-            .text_xl()
-            .text_color(rgb(0xffffff))
-            .child(format!("Hello, {}!", &self.text))
-            .child(
-                div()
-                    .flex()
-                    .gap_2()
-                    .child(div().size_8().bg(gpui::red()))
-                    .child(div().size_8().bg(gpui::green()))
-                    .child(div().size_8().bg(gpui::blue()))
-                    .child(div().size_8().bg(gpui::yellow()))
-                    .child(div().size_8().bg(gpui::black()))
-                    .child(div().size_8().bg(gpui::white())),
-            )
+        div().size_full().child(
+            img(self.gif_path.clone())
+                .size_full()
+                .object_fit(gpui::ObjectFit::Contain)
+                .id("gif"),
+        )
     }
 }
 
 fn main() {
+    env_logger::init();
     Application::new().run(|cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
+        let gif_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("src/assets/images/black-cat-typing.gif");
+
         cx.open_window(
             WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
+                focus: true,
                 ..Default::default()
             },
-            |_, cx| {
-                cx.new(|_| HelloWorld {
-                    text: "World".into(),
-                })
-            },
+            |_, cx| cx.new(|_| GifViewer::new(gif_path)),
         )
         .unwrap();
+        cx.activate(true);
     });
 }
