@@ -1,16 +1,15 @@
 use gpui::{
-    App, Application, Bounds, Context, KeyBinding, PromptButton, PromptLevel, Timer, Window,
-    WindowBounds, WindowKind, WindowOptions, actions, div, prelude::*, px, rgb, size,
+    App, Application, Bounds, Context, KeyBinding, PromptButton, PromptLevel, SharedString, Timer,
+    Window, WindowBounds, WindowKind, WindowOptions, actions, div, prelude::*, px, rgb, size,
 };
 
 struct SubWindow {
     custom_titlebar: bool,
-    is_dialog: bool,
 }
 
 fn button(text: &str, on_click: impl Fn(&mut Window, &mut App) + 'static) -> impl IntoElement {
     div()
-        .id(text.to_string())
+        .id(SharedString::from(text.to_string()))
         .flex_none()
         .px_2()
         .bg(rgb(0xf7f7f7))
@@ -24,10 +23,7 @@ fn button(text: &str, on_click: impl Fn(&mut Window, &mut App) + 'static) -> imp
 }
 
 impl Render for SubWindow {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let window_bounds =
-            WindowBounds::Windowed(Bounds::centered(None, size(px(250.0), px(200.0)), cx));
-
+    fn render(&mut self, _window: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
         div()
             .flex()
             .flex_col()
@@ -56,28 +52,8 @@ impl Render for SubWindow {
             .child(
                 div()
                     .p_8()
-                    .flex()
-                    .flex_col()
                     .gap_2()
                     .child("SubWindow")
-                    .when(self.is_dialog, |div| {
-                        div.child(button("Open Nested Dialog", move |_, cx| {
-                            cx.open_window(
-                                WindowOptions {
-                                    window_bounds: Some(window_bounds),
-                                    kind: WindowKind::Dialog,
-                                    ..Default::default()
-                                },
-                                |_, cx| {
-                                    cx.new(|_| SubWindow {
-                                        custom_titlebar: false,
-                                        is_dialog: true,
-                                    })
-                                },
-                            )
-                            .unwrap();
-                        }))
-                    })
                     .child(button("Close", |window, _| {
                         window.remove_window();
                     })),
@@ -110,7 +86,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: false,
-                            is_dialog: false,
                         })
                     },
                 )
@@ -126,39 +101,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: false,
-                            is_dialog: false,
-                        })
-                    },
-                )
-                .unwrap();
-            }))
-            .child(button("Floating", move |_, cx| {
-                cx.open_window(
-                    WindowOptions {
-                        window_bounds: Some(window_bounds),
-                        kind: WindowKind::Floating,
-                        ..Default::default()
-                    },
-                    |_, cx| {
-                        cx.new(|_| SubWindow {
-                            custom_titlebar: false,
-                            is_dialog: false,
-                        })
-                    },
-                )
-                .unwrap();
-            }))
-            .child(button("Dialog", move |_, cx| {
-                cx.open_window(
-                    WindowOptions {
-                        window_bounds: Some(window_bounds),
-                        kind: WindowKind::Dialog,
-                        ..Default::default()
-                    },
-                    |_, cx| {
-                        cx.new(|_| SubWindow {
-                            custom_titlebar: false,
-                            is_dialog: true,
                         })
                     },
                 )
@@ -174,7 +116,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: true,
-                            is_dialog: false,
                         })
                     },
                 )
@@ -190,7 +131,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: false,
-                            is_dialog: false,
                         })
                     },
                 )
@@ -207,7 +147,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: false,
-                            is_dialog: false,
                         })
                     },
                 )
@@ -223,7 +162,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: false,
-                            is_dialog: false,
                         })
                     },
                 )
@@ -239,7 +177,6 @@ impl Render for WindowDemo {
                     |_, cx| {
                         cx.new(|_| SubWindow {
                             custom_titlebar: false,
-                            is_dialog: false,
                         })
                     },
                 )
